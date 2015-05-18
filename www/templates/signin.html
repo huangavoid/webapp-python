@@ -1,0 +1,72 @@
+{% extends '__base__.html' %}
+
+{% block title %} 登录 {% endblock %}
+
+{% block content %}
+
+<div class="uk-width-medium-1-5"><!-- blank --></div>
+<div class="uk-width-medium-3-5">
+    <h1>账户登录！</h1>
+    
+    <form id="form-signin" v-on="submit: submit" class="uk-form uk-form-stacked">
+        <div class="uk-alert uk-alert-danger uk-hidden"></div>
+        <div class="uk-form-row">
+            <div class="uk-form-icon uk-width-1-1">
+                <i class="uk-icon-envelope-o"></i>
+                <input v-model="email" type="text" placeholder="电子邮箱" maxlength="50" class="uk-width-1-1 uk-form-large">
+            </div>
+        </div>
+        <div class="uk-form-row">
+            <div class="uk-form-icon uk-width-1-1">
+                <i class="uk-icon-lock"></i>
+                <input v-model="password" type="password" placeholder="口令" maxlength="50" class="uk-width-1-1 uk-form-large">
+            </div>
+        </div>
+        <div class="uk-form-row">
+            <button type="submit" class="uk-width-1-1 uk-button uk-button-primary uk-button-large"><i class="uk-icon-sign-in"></i> 登录</button>
+        </div>
+        <div class="uk-form-row uk-text-small">
+            <label class="uk-float-left"><input v-model="remember" type="checkbox"> 记住我</label>
+        </div>
+    </form>
+    
+</div>
+<div class="uk-width-medium-1-5"><!-- blank --></div>
+
+{% endblock %}
+
+{% block scripter %}
+
+<script type="text/javascript">
+$(function() {
+    var vm = new Vue({
+        el: '#form-signin',
+        data: {
+            email: '',
+            password: '',
+            remember: false
+        },
+        methods: {
+            submit: function (event) {
+                event.preventDefault();
+                showError();
+                startLoading();
+                postApi('/api/user/authenticate', {
+                    email: this.email.trim().toLowerCase(),
+                    password: CryptoJS.MD5(this.password).toString(),
+                    remember: this.remember
+                }, function (err, result) {
+                    if (err) {
+                        showError(err);
+                    } else {
+                        return location.assign(result.admin ? '/manage/' : '/');
+                    }
+                    stopLoading();
+                });
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}
